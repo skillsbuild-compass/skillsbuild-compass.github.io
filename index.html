@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IBM SkillsBuild Compass | Student Concept Prototype</title>
+<meta name="description" content="Student concept prototype: start with your job, see what's changing and what it's worth, then see the course.">
+<style>
+:root{
+  color-scheme:light;
+  --ink:#0e1726; --ink-2:#3a4656; --muted:#6b7686; --line:#e3e8ef; --line-2:#eef2f7;
+  --bg:#f4f7fb; --card:#fff;
+  --blue:#0f62fe; --blue-d:#0043ce; --blue-s:#edf4ff; --blue-s2:#d0e2ff;
+  --violet:#8a3ffc; --violet-s:#f3ecff;
+  --teal:#007d79; --teal-s:#e3f6f5;
+  --amber:#8e6a00; --amber-s:#fcf4d6;
+  --red:#a2191f; --red-s:#fff1f1;
+  --r:16px; --shadow:0 1px 2px rgba(14,23,38,.05),0 8px 24px rgba(14,23,38,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink); background:var(--bg); line-height:1.55; -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(900px 500px at 100% -10%, rgba(15,98,254,.10), transparent 60%),
+    radial-gradient(700px 420px at -10% 20%, rgba(138,63,252,.07), transparent 60%),
+    radial-gradient(rgba(14,23,38,.05) 1px, transparent 1px);
+  background-size:auto,auto,22px 22px;
+  min-height:100vh;
+}
+svg{display:block}
+button{font:inherit}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.86);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1080px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;cursor:pointer}
+.brand-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--violet));display:grid;place-items:center;box-shadow:0 4px 12px rgba(15,98,254,.3)}
+.brand-txt small{display:block;font-size:11px;color:var(--muted);letter-spacing:.02em;line-height:1.1}
+.brand-txt b{font-size:17px;letter-spacing:-.01em;line-height:1.1}
+.pill{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--amber);background:var(--amber-s);border:1px solid #f1dc97;padding:4px 10px;border-radius:99px;white-space:nowrap}
+
+/* STEPPER */
+.stepper{max-width:1080px;margin:0 auto;padding:18px 20px 0;display:none}
+.stepper.show{display:block}
+.steps{display:flex;gap:6px;list-style:none;margin:0;padding:0}
+.steps li{flex:1;min-width:0}
+.steps .track{height:4px;border-radius:99px;background:var(--line);overflow:hidden}
+.steps .track i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--violet));transition:width .45s ease}
+.steps li.past .track i,.steps li.on .track i{width:100%}
+.steps span{display:block;font-size:11.5px;color:var(--muted);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.steps li.on span{color:var(--blue);font-weight:700}
+.steps li.past span{color:var(--ink-2)}
+
+/* LAYOUT */
+main{max-width:1080px;margin:0 auto;padding:22px 20px 70px}
+.screen{display:none}
+.screen.on{display:block;animation:enter .45s cubic-bezier(.2,.7,.2,1)}
+@keyframes enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.stagger>*{animation:enter .5s cubic-bezier(.2,.7,.2,1) both}
+.stagger>*:nth-child(2){animation-delay:.06s}.stagger>*:nth-child(3){animation-delay:.12s}
+.stagger>*:nth-child(4){animation-delay:.18s}.stagger>*:nth-child(5){animation-delay:.24s}
+.stagger>*:nth-child(6){animation-delay:.30s}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:30px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin:0 0 12px}
+.eyebrow .dot{width:6px;height:6px;border-radius:99px;background:var(--blue)}
+h1{font-size:clamp(30px,4.6vw,46px);line-height:1.08;letter-spacing:-.03em;margin:0 0 16px}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--blue),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:clamp(22px,2.8vw,28px);line-height:1.2;letter-spacing:-.02em;margin:0 0 10px}
+h3{font-size:16px;margin:0 0 6px;letter-spacing:-.01em}
+p{margin:0 0 14px}
+.lead{font-size:17px;color:var(--ink-2)}
+.muted{color:var(--muted)}
+.small{font-size:13px;color:var(--muted)}
+
+.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:stretch}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* BUTTONS */
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:12px;border:1.5px solid var(--blue);background:var(--blue);color:#fff;font-weight:600;cursor:pointer;text-decoration:none;transition:background .15s,transform .08s,box-shadow .15s;box-shadow:0 6px 16px rgba(15,98,254,.22)}
+.btn:hover{background:var(--blue-d);border-color:var(--blue-d)}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none}
+.btn.ghost{background:#fff;color:var(--blue);box-shadow:none}
+.btn.ghost:hover{background:var(--blue-s)}
+.btn.plain{background:transparent;border-color:transparent;color:var(--muted);box-shadow:none;padding-left:8px;padding-right:8px}
+.btn.plain:hover{color:var(--ink)}
+.btn svg{width:18px;height:18px}
+
+/* HERO */
+.hero{padding:40px}
+.meta-row{display:flex;flex-wrap:wrap;gap:16px;margin-top:18px;font-size:13.5px;color:var(--ink-2)}
+.meta-row span{display:inline-flex;align-items:center;gap:6px}
+.meta-row svg{width:16px;height:16px;color:var(--teal)}
+.preview{background:linear-gradient(160deg,#0b1f4b,#1d0f4a);border-radius:var(--r);padding:26px;color:#fff;position:relative;overflow:hidden;min-height:340px}
+.preview:after{content:"";position:absolute;inset:0;background:radial-gradient(360px 220px at 90% 0%,rgba(138,63,252,.45),transparent 70%),radial-gradient(300px 200px at 0% 100%,rgba(15,98,254,.45),transparent 70%);pointer-events:none}
+.preview>*{position:relative;z-index:1}
+.preview .pv-lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:14px}
+.flow{display:flex;flex-direction:column;gap:10px}
+.flow-item{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 14px}
+.flow-item .n{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:13px;font-weight:700;background:rgba(255,255,255,.14);flex:0 0 28px}
+.flow-item b{display:block;font-size:14px}
+.flow-item span{font-size:12.5px;opacity:.75}
+.flow-item.last{background:#fff;color:var(--ink);border-color:#fff}
+.flow-item.last .n{background:var(--blue);color:#fff}
+.flow-item.last span{color:var(--muted);opacity:1}
+.flow-note{font-size:12px;opacity:.7;margin-top:12px}
+
+.feature{padding:22px}
+.ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px}
+.ico svg{width:22px;height:22px}
+.ico.b{background:var(--blue-s);color:var(--blue)}
+.ico.v{background:var(--violet-s);color:var(--violet)}
+.ico.t{background:var(--teal-s);color:var(--teal)}
+.ico.a{background:var(--amber-s);color:var(--amber)}
+.feature p{font-size:14px;color:var(--muted);margin:0}
+
+/* ROLES */
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+@media(max-width:860px){.roles{grid-template-columns:1fr}}
+.role{text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:22px;cursor:pointer;transition:border-color .15s,box-shadow .2s,transform .15s;position:relative;color:inherit}
+.role:hover{border-color:var(--blue);box-shadow:0 10px 28px rgba(15,98,254,.14);transform:translateY(-2px)}
+.role b{display:block;font-size:17px;margin-bottom:4px;letter-spacing:-.01em}
+.role .sub{display:block;font-size:13.5px;color:var(--muted);margin-bottom:14px}
+.role .tags{display:flex;flex-wrap:wrap;gap:6px}
+.role .arrow{position:absolute;top:22px;right:20px;color:var(--line);transition:color .15s,transform .15s}
+.role:hover .arrow{color:var(--blue);transform:translateX(3px)}
+.role .arrow svg{width:20px;height:20px}
+.soon{margin-top:14px;display:flex;align-items:center;gap:12px;padding:14px 18px;border:1.5px dashed var(--line);border-radius:var(--r);color:var(--muted);font-size:13.5px;background:rgba(255,255,255,.6)}
+.soon svg{width:18px;height:18px;flex:0 0 18px}
+.chip{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--line-2);color:var(--ink-2);white-space:nowrap}
+.chip.b{background:var(--blue-s);color:var(--blue-d)}
+.chip.t{background:var(--teal-s);color:var(--teal);font-weight:600}
+.chip.a{background:var(--amber-s);color:var(--amber)}
+.chip.x{background:var(--red-s);color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* CONFIDENCE */
+.confwrap{max-width:720px;margin:0 auto;text-align:center}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:26px 0 10px}
+.scale button{padding:18px 6px;border-radius:14px;border:1.5px solid var(--line);background:#fff;cursor:pointer;transition:.15s;color:var(--ink)}
+.scale button b{display:block;font-size:24px;letter-spacing:-.02em}
+.scale button span{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.scale button:hover{border-color:var(--blue);background:var(--blue-s)}
+.scale button[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 8px 20px rgba(15,98,254,.25)}
+.scale button[aria-pressed=true] span{color:rgba(255,255,255,.85)}
+@media(max-width:560px){.scale button span{display:none}}
+
+/* CHANGE */
+.headline{display:flex;gap:18px;align-items:flex-start}
+.headline .ico{flex:0 0 52px;width:52px;height:52px;margin:0}
+.compare{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;margin-top:22px}
+@media(max-width:760px){.compare{grid-template-columns:1fr}.compare .mid{transform:rotate(90deg);justify-self:center}}
+.col{border-radius:14px;padding:20px;border:1px solid var(--line)}
+.col.then{background:#fafbfd}
+.col.now{background:var(--blue-s);border-color:var(--blue-s2)}
+.col h4{margin:0 0 12px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.col.now h4{color:var(--blue)}
+.col ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.col li{display:flex;gap:10px;font-size:14.5px}
+.col li svg{flex:0 0 18px;width:18px;height:18px;margin-top:2px}
+.col.then li svg{color:#aab4c2}
+.col.now li svg{color:var(--blue)}
+.mid{display:grid;place-items:center;color:var(--blue)}
+.mid svg{width:26px;height:26px}
+.note{display:flex;gap:10px;margin-top:18px;padding:12px 14px;border-radius:12px;background:#fafbfd;border:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.note svg{flex:0 0 16px;width:16px;height:16px;margin-top:2px}
+
+/* CAPABILITY */
+.needs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+@media(max-width:640px){.needs{grid-template-columns:1fr}}
+.needbox{border-radius:14px;padding:18px;border:1px solid var(--line)}
+.needbox h4{margin:0 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.needbox.no h4{color:var(--red)}
+.needbox.yes h4{color:var(--teal)}
+.needbox.yes{background:var(--teal-s);border-color:#bfe6e3}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.valuecard{background:linear-gradient(160deg,#0b1f4b,#1d0f4a);color:#fff;border-radius:var(--r);padding:26px;height:100%}
+.valuecard h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin-bottom:16px;font-weight:600}
+.valuecard ul{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.valuecard li{display:flex;gap:12px;font-size:15px;line-height:1.45}
+.valuecard li .ck{flex:0 0 26px;width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.14);display:grid;place-items:center}
+.valuecard li .ck svg{width:15px;height:15px}
+.withheld{display:flex;align-items:center;gap:10px;margin-top:18px;font-size:13px;color:var(--violet);background:var(--violet-s);padding:10px 14px;border-radius:12px}
+.withheld svg{width:16px;height:16px;flex:0 0 16px}
+
+/* COURSES */
+.courses{position:relative;display:grid;gap:14px;margin-top:22px}
+.course{display:grid;grid-template-columns:auto 1fr;gap:18px;background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:20px 22px;position:relative}
+.course.first{border-color:var(--blue);box-shadow:0 10px 28px rgba(15,98,254,.12)}
+.course .num{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:700;background:var(--line-2);color:var(--ink-2)}
+.course.first .num{background:var(--blue);color:#fff}
+.course h3{font-size:17px;margin-bottom:6px}
+.course p{font-size:14px;color:var(--muted);margin:0 0 12px}
+.course .chips{gap:6px}
+.chip svg{width:12px;height:12px;display:inline-block;vertical-align:-1px;margin-right:4px}
+.ribbon{position:absolute;top:-11px;right:18px;background:var(--blue);color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:99px}
+.verified{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:12.5px;color:var(--teal);background:var(--teal-s);padding:12px 14px;border-radius:12px}
+.verified svg{flex:0 0 16px;width:16px;height:16px;margin-top:1px}
+
+/* SUMMARY */
+.path{position:relative;display:grid;gap:0;margin-top:10px}
+.pstep{display:grid;grid-template-columns:44px 1fr;gap:16px;position:relative;padding-bottom:22px}
+.pstep:not(:last-child):before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:linear-gradient(var(--blue-s2),var(--line))}
+.pstep .dot{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--blue-s);color:var(--blue)}
+.pstep .dot svg{width:20px;height:20px}
+.pstep:last-child .dot{background:var(--blue);color:#fff;box-shadow:0 8px 20px rgba(15,98,254,.28)}
+.pstep small{display:block;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:2px}
+.pstep b{display:block;font-size:15.5px;margin-top:2px}
+.stat{border-radius:var(--r);padding:22px;border:1px solid var(--line);background:#fff}
+.stat .big{font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.stat .big.b{color:var(--blue)}
+.stat .lbl{font-size:13px;color:var(--muted);margin-top:4px}
+.stack{display:grid;gap:14px}
+
+/* DONE */
+.done{text-align:center;max-width:720px;margin:0 auto;padding:44px 30px}
+.done .badge{width:72px;height:72px;border-radius:22px;margin:0 auto 20px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;box-shadow:0 12px 30px rgba(15,98,254,.3)}
+.done .badge svg{width:34px;height:34px}
+.recall{display:inline-flex;align-items:center;gap:10px;margin:8px 0 4px;padding:10px 16px;border-radius:99px;background:var(--blue-s);color:var(--blue-d);font-size:14px;font-weight:600}
+.done .actions{justify-content:center}
+
+.whynow{display:flex;gap:16px;align-items:flex-start;margin-top:22px;padding:20px 22px;border-radius:var(--r);background:#fff;border:1px solid var(--line);border-left:4px solid var(--violet);box-shadow:var(--shadow);font-size:14.5px;color:var(--ink-2)}
+.whynow .wn-ico{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:var(--violet-s);color:var(--violet);display:grid;place-items:center}
+.whynow .wn-ico svg{width:20px;height:20px}
+.whynow b{color:var(--ink)}
+.whynow a{display:block;margin-top:6px;font-size:12.5px;color:var(--violet);text-decoration:none;font-weight:600}
+.whynow a:hover{text-decoration:underline}
+.shared{display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;padding:8px 14px;border-radius:99px;background:var(--teal-s);color:var(--teal);font-size:13.5px;font-weight:600}
+.shared svg{width:16px;height:16px}
+.sharebox{margin-top:18px;padding:20px 22px;border-radius:var(--r);background:linear-gradient(135deg,var(--blue-s),var(--violet-s));border:1px solid var(--blue-s2);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.sharebox .txt{flex:1;min-width:220px}
+.sharebox .txt b{display:block;font-size:15.5px;margin-bottom:2px}
+.sharebox .txt span{font-size:13.5px;color:var(--ink-2)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:50;box-shadow:0 10px 30px rgba(14,23,38,.3)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+footer{max-width:1080px;margin:0 auto;padding:0 20px 36px;font-size:12px;color:var(--muted)}
+footer .fin{border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" onclick="go(0)" aria-label="Home">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.4 13.4 8.5 15.5 10.6 10.6z" fill="#fff"/></svg>
+      </span>
+      <span class="brand-txt"><small>IBM SkillsBuild</small><b>Compass</b></span>
+    </a>
+    <span class="pill">Student concept prototype</span>
+  </div>
+</header>
+
+<nav class="stepper" id="stepper" aria-label="Progress">
+  <ol class="steps" id="steps"></ol>
+</nav>
+
+<main>
+
+  <!-- 0 WELCOME -->
+  <section class="screen" id="s0">
+    <div class="grid2 stagger">
+      <div class="card hero">
+        <p class="eyebrow"><span class="dot"></span>Find learning that's worth your time</p>
+        <h1>Start with your job.<br><em>Not with a course list.</em></h1>
+        <p class="lead">Tell us what you do. We'll show you what's changing in your role, the one capability that matters, and what it lets you do at work, <b>before</b> we show you a single course.</p>
+        <div class="actions">
+          <button class="btn" onclick="go(1)">Find my starting point <span data-i="arrow"></span></button>
+        </div>
+        <div class="meta-row">
+          <span><span data-i="clock"></span>About 3 minutes</span>
+          <span><span data-i="check"></span>Free courses</span>
+          <span><span data-i="check"></span>No sign-up to explore</span>
+        </div>
+      </div>
+      <div class="preview">
+        <div class="pv-lbl">How Compass works</div>
+        <div class="flow">
+          <div class="flow-item"><div class="n">1</div><div><b>Your role</b><span>Pick the job closest to yours</span></div></div>
+          <div class="flow-item"><div class="n">2</div><div><b>What's changing</b><span>How your work is shifting</span></div></div>
+          <div class="flow-item"><div class="n">3</div><div><b>What it's worth</b><span>The capability, and what it lets you do</span></div></div>
+          <div class="flow-item last"><div class="n">4</div><div><b>Then the course</b><span>The shortest route there</span></div></div>
+        </div>
+        <div class="flow-note">Most platforms start at step 4. Compass ends there.</div>
+      </div>
+    </div>
+    <div class="whynow stagger">
+      <div class="wn-ico"><span data-i="target"></span></div>
+      <div>
+        <b>Why now:</b> IBM has committed to training 2 million people in AI by the end of 2026, as part of a goal to skill 30 million people by 2030. Sign-ups alone don't get there. Compass is designed to help people who have never heard of SkillsBuild find a reason to start, and a course worth finishing.
+        <a href="https://newsroom.ibm.com/2023-09-18-IBM-Commits-to-Train-2-Million-in-Artificial-Intelligence-in-Three-Years,-with-a-Focus-on-Underrepresented-Communities" target="_blank" rel="noopener">Source: IBM Newsroom, 18 Sept 2023</a>
+      </div>
+    </div>
+    <div class="grid3 stagger" style="margin-top:22px">
+      <div class="card feature"><div class="ico b"><span data-i="user"></span></div><h3>Built around your role</h3><p>You don't need to know what you want to learn. You only need to know what you do.</p></div>
+      <div class="card feature"><div class="ico v"><span data-i="eye"></span></div><h3>See the payoff first</h3><p>Know what a skill lets you do at work before you spend an evening on it.</p></div>
+      <div class="card feature"><div class="ico t"><span data-i="badge"></span></div><h3>Real, free courses</h3><p>Every recommendation is a live course in the IBM SkillsBuild catalogue.</p></div>
+    </div>
+  </section>
+
+  <!-- 1 ROLE -->
+  <section class="screen" id="s1">
+    <div class="card">
+      <p class="eyebrow"><span class="dot"></span>Step 1 · Your role</p>
+      <h2>What do you do right now?</h2>
+      <p class="lead muted" style="margin:0">Pick the closest match. You don't need to know what you want to learn yet.</p>
+      <div class="roles stagger" id="rolelist"></div>
+      <div class="soon"><span data-i="plus"></span><span><b>More roles coming:</b> Sales · Administration · Education · Healthcare · Retail. This prototype covers three.</span></div>
+    </div>
+  </section>
+
+  <!-- 2 PRE CONFIDENCE -->
+  <section class="screen" id="s2">
+    <div class="card confwrap">
+      <div class="shared" id="sharedNote" style="display:none"><span data-i="share"></span><span id="sharedTxt"></span></div>
+      <p class="eyebrow" style="display:flex;justify-content:center"><span class="dot"></span>Before we start</p>
+      <h2>Right now, how confident are you that you could pick a course that's worth your time?</h2>
+      <p class="muted" style="margin:0">Be honest. There's no right answer. We'll ask again at the end.</p>
+      <div class="scale" id="prescale"></div>
+      <div class="actions" style="justify-content:center"><button class="btn" id="prenext" disabled onclick="go(3)">Continue <span data-i="arrow"></span></button></div>
+    </div>
+  </section>
+
+  <!-- 3 CHANGE -->
+  <section class="screen" id="s3">
+    <div class="card">
+      <p class="eyebrow"><span class="dot"></span>Step 2 · What's changing</p>
+      <div class="headline">
+        <div class="ico b" id="changeIco"></div>
+        <div>
+          <h2 id="changeTitle"></h2>
+          <p class="lead muted" id="changeBody" style="margin:0"></p>
+        </div>
+      </div>
+      <div class="compare stagger">
+        <div class="col then"><h4>How it used to work</h4><ul id="thenList"></ul></div>
+        <div class="mid"><span data-i="arrow"></span></div>
+        <div class="col now"><h4>How it works now</h4><ul id="nowList"></ul></div>
+      </div>
+      <div class="note"><span data-i="info"></span><span id="changeSrc"></span></div>
+      <div class="actions">
+        <button class="btn" onclick="go(4)">What does this mean for me? <span data-i="arrow"></span></button>
+        <button class="btn plain" onclick="go(1)">Change role</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 CAPABILITY -->
+  <section class="screen" id="s4">
+    <div class="grid2 stagger">
+      <div class="card">
+        <p class="eyebrow"><span class="dot"></span>Step 3 · The capability</p>
+        <h2 id="capTitle"></h2>
+        <p class="lead muted" id="capBody"></p>
+        <div class="needs">
+          <div class="needbox no"><h4>You don't need</h4><div class="chips" id="notNeed"></div></div>
+          <div class="needbox yes"><h4>You do need</h4><div class="chips" id="need"></div></div>
+        </div>
+        <div class="withheld"><span data-i="lock"></span>No course shown yet, on purpose. Value first, course second.</div>
+        <div class="actions"><button class="btn" onclick="go(5)">Show me how to get there <span data-i="arrow"></span></button></div>
+      </div>
+      <div class="valuecard">
+        <h3>What it lets you do at work</h3>
+        <ul id="valueList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 COURSES -->
+  <section class="screen" id="s5">
+    <div class="card">
+      <p class="eyebrow"><span class="dot"></span>Step 4 · Your learning</p>
+      <h2>The shortest route to that capability</h2>
+      <p class="lead muted" id="courseIntro" style="margin:0"></p>
+      <div class="courses stagger" id="courseList"></div>
+      <div class="verified"><span data-i="shield"></span><span>These are real, free IBM SkillsBuild courses. Titles, durations, levels and credentials checked against the public catalogue at skillsbuild.org/learning-catalog on 25 September 2026.</span></div>
+      <div class="actions"><button class="btn" onclick="go(6)">See my full pathway <span data-i="arrow"></span></button></div>
+    </div>
+  </section>
+
+  <!-- 6 SUMMARY -->
+  <section class="screen" id="s6">
+    <div class="grid2 stagger">
+      <div class="card">
+        <p class="eyebrow"><span class="dot"></span>Step 5 · Your pathway</p>
+        <h2>From where you are to what you can do</h2>
+        <div class="path" id="path"></div>
+      </div>
+      <div class="stack">
+        <div class="stat"><div class="big b" id="firstHrs"></div><div class="lbl">for your first step, the one that matters most</div></div>
+        <div class="stat"><div class="big" id="totalHrs"></div><div class="lbl" id="totalLbl"></div></div>
+        <div class="stat"><div class="big" style="color:var(--teal)">Free</div><div class="lbl">Every course on this pathway, with no fee to start</div></div>
+        <div class="card" style="padding:22px">
+          <h3>Not all-or-nothing</h3>
+          <p class="small" style="margin:0 0 16px">You can stop after the first course and still have the capability that matters most in your role.</p>
+          <a class="btn ghost" href="https://skillsbuild.org/learning-catalog" target="_blank" rel="noopener">Open the SkillsBuild catalogue <span data-i="ext"></span></a>
+        </div>
+      </div>
+    </div>
+    <div class="sharebox">
+      <div class="txt"><b>Know someone in this role?</b><span id="shareLbl">Send them this pathway. It opens straight on their role.</span></div>
+      <button class="btn ghost" onclick="share()"><span data-i="share"></span> Share this pathway</button>
+    </div>
+    <div class="actions"><button class="btn" onclick="go(7)">I'm done <span data-i="arrow"></span></button><button class="btn plain" onclick="restart()">Try another role</button></div>
+  </section>
+
+  <!-- 7 DONE -->
+  <section class="screen" id="s7">
+    <div class="card done">
+      <div class="badge"><span data-i="compass"></span></div>
+      <h2>That's your starting point.</h2>
+      <p class="lead muted">One last thing. We're testing whether starting with your role actually helps. Your answer is the whole point of this prototype.</p>
+      <div class="recall"><span data-i="info"></span><span>Before you started, you rated your confidence <b id="preRecall">–</b> out of 5.</span></div>
+      <div class="actions">
+        <a class="btn" id="formBtn" target="_blank" rel="noopener">Give 2 minutes of feedback <span data-i="ext"></span></a>
+        <button class="btn ghost" onclick="restart()">Try another role</button>
+      </div>
+      <p class="small" id="formMissing" style="display:none;margin-top:14px">Feedback link not set up yet.</p>
+    </div>
+  </section>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<footer>
+  <div class="fin">
+    <b>Student concept prototype.</b> Built by RMIT BUSM2578 Group LF08G01 (Semester 2, 2026) to test a proposed feature, "Outcome-First Enrolment". Not affiliated with, endorsed by, or operated by IBM. Course titles are real IBM SkillsBuild catalogue items; the role-change scenarios are illustrative, written for testing, and informed by the group's own interviews. No personal data is collected on this page.
+  </div>
+</footer>
+
+<script>
+/* ============ SETTINGS ============
+   Paste your Google Form link between the quotes.
+   Optional: if you use a pre-filled link, put {ROLE}, {PRE} and {SRC}
+   where the answers go and Compass will fill them in automatically.  */
+const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfZFG7rbWETyPogAYiswF3Q6zAGDtpwxeCXHXBDZRENrj_-vw/viewform?usp=pp_url&entry.992940420=%7BROLE%7D&entry.1497372788=%7BPRE%7D&entry.968716222=%7BSRC%7D";
+/* ================================== */
+
+const I = {
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  badge:'<circle cx="12" cy="9" r="6"/><path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5"/>',
+  plus:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  shield:'<path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/>',
+  ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  compass:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.4 13.4 8.5 15.5 10.6 10.6z"/>',
+  truck:'<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+  brief:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
+  people:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><circle cx="17" cy="9" r="2.8"/><path d="M16 14.6c2.8.2 4.7 2 5.5 5"/>',
+  chart:'<path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>',
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+  dot:'<circle cx="12" cy="12" r="3"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  share:'<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/>'
+};
+const svg = (k,sw=2)=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round">'+I[k]+'</svg>';
+const paint = root=>root.querySelectorAll('[data-i]').forEach(el=>{el.innerHTML=svg(el.dataset.i);el.removeAttribute('data-i');});
+
+const ROLES = {
+  ops:{
+    icon:'truck', tone:'b',
+    label:"Operations / Logistics", sub:"Planning, scheduling, team and process management",
+    tags:["Operations manager","Supervisor","Planner"],
+    changeTitle:"Reporting is being automated. The judgement isn't.",
+    change:"Systems now produce the numbers for you. The work that's moving up is reading them, spotting what's wrong, and getting a team to act.",
+    then:["Compiling weekly reports by hand from system exports","Reacting to delays as they happen","Decisions based mostly on experience"],
+    now:["Systems generate the reports automatically","Managers are expected to explain the trend behind the numbers","Decisions are expected to come with evidence"],
+    src:"Illustrative scenario written for testing. Consistent with this project's interviews, where an operations manager of 15 years described his role shifting from hands-on work to technology-managed operations.",
+    capTitle:"Working confidently with your own operational data",
+    capBody:"Not programming. Getting a messy export into a state you'd defend, finding the trend inside it, and showing it to people who won't read a spreadsheet.",
+    notNeed:["Coding","A data science degree","Advanced statistics"],
+    need:["Cleaning a messy export","Spotting a trend","One clear chart"],
+    values:["Take a raw system export and get it to where you'd defend the numbers in a meeting","Find the pattern behind a recurring delay instead of reacting to it each time","Put one chart in front of management that makes the case for you"],
+    intro:"Start with the first. The others only matter once you can trust your own data.",
+    courses:[
+      {t:"Data Manipulation and Preparation",d:"Fix missing values and duplicates, profile a data set, and clean and transform data in Microsoft Excel.",lo:3,hi:10,lvl:"Advanced",cred:false},
+      {t:"Data Visualization and Communication",d:"Build visualisations that communicate an insight rather than just display numbers.",lo:3,hi:10,lvl:"Advanced",cred:false},
+      {t:"Exploring the Basics of Project Management",d:"Stakeholder analysis and delivery frameworks: the language used when operational decisions get escalated.",lo:1,hi:3,lvl:"Intermediate",cred:false}
+    ]
+  },
+  fin:{
+    icon:'brief', tone:'v',
+    label:"Financial Advisory / Insurance", sub:"Client advisory, financial planning, commission-based roles",
+    tags:["Financial advisor","Insurance agent","Wealth planner"],
+    changeTitle:"Clients can now get basic financial analysis without you.",
+    change:"Robo-advisors and AI chatbots handle the parts of advice that were easiest to standardise. That doesn't remove the advisor. It moves where the value sits.",
+    then:["Clients came to you for basic calculations","Comparing products was your advantage","Planning started with a meeting"],
+    now:["Apps and robo-advisors run the basic analysis for free","Clients arrive having already compared online","Your value is the judgement an app can't give"],
+    src:"Illustrative scenario written for testing. Consistent with this project's interviews, where a financial advisor described clients asking why they needed him when an app could do it.",
+    capTitle:"Knowing what generative AI can and can't do",
+    capBody:"Enough working knowledge to use these tools in front of a client and to explain their limits credibly. Beginner level. No technical background needed.",
+    notNeed:["A technical background","Programming","New qualifications first"],
+    need:["What AI can do","Where it gets it wrong","Using it with clients"],
+    values:["Answer \"why do I need you, the app does this\" with something specific, not defensive","Use AI to draft client messages and summarise documents, cutting unbilled admin time","Hold a clear position on where automated advice fails, because that is where your value now sits"],
+    intro:"Start with the first. It's beginner level and earns you a digital credential.",
+    courses:[
+      {t:"Getting Started with Generative AI",d:"Foundations of generative AI, its ethics, and how large language models are used in real settings like customer service.",lo:3,hi:10,lvl:"Foundational",cred:true},
+      {t:"Explore Emerging Tech",d:"An orientation across data, AI, cloud, cybersecurity and quantum. Useful if you're not sure which of these touches your work.",lo:3,hi:10,lvl:"Foundational",cred:true},
+      {t:"Cybersecurity and Data",d:"Data privacy, sensitive data, and what happens when client data is breached. Directly relevant to a regulated advisory role.",lo:1,hi:3,lvl:"Foundational",cred:false}
+    ]
+  },
+  hr:{
+    icon:'people', tone:'t',
+    label:"HR / Recruitment", sub:"Talent acquisition, people operations, HR generalist",
+    tags:["Recruiter","HR executive","Talent partner"],
+    changeTitle:"Software now screens the CV before you see the candidate.",
+    change:"Automated shortlisting sits upstream of most recruiters, and HR is increasingly expected to bring evidence to hiring decisions rather than impressions.",
+    then:["Recruiters read every CV themselves","Shortlists built on experience and instinct","Reporting meant headcount and time-to-fill"],
+    now:["Software screens and grades CVs first","Many candidates are filtered before a person sees them","HR is expected to bring data to hiring decisions"],
+    src:"Illustrative scenario written for testing. Consistent with this project's interviews, where a recruiter described AI scanning and grading CVs, and named analytics as a gap he was trying to close.",
+    capTitle:"Reading hiring data and understanding automated screening",
+    capBody:"Enough data skill to turn an applicant-tracking export into an argument, and enough AI literacy to know how screening software ranks the people you're trying to place.",
+    notNeed:["Coding","Building AI tools","A statistics background"],
+    need:["Reading hiring data","Presenting it","How screening ranks CVs"],
+    values:["Turn a messy applicant-tracking export into a view of where candidates drop out","Take a hiring recommendation to a line manager with evidence behind it","Understand how AI screening scores a CV, for advising candidates and auditing your own process"],
+    intro:"Start with data, then AI. The first course changes your day-to-day fastest.",
+    courses:[
+      {t:"Data Manipulation and Preparation",d:"Clean and transform a data set in Microsoft Excel, handle missing values and duplicates, check data quality.",lo:3,hi:10,lvl:"Advanced",cred:false},
+      {t:"Data Visualization and Communication",d:"Communicate a finding from hiring data to the people who make decisions on it.",lo:3,hi:10,lvl:"Advanced",cred:false},
+      {t:"Getting Started with Generative AI",d:"Foundations of generative AI and its ethics: transparency, accountability and fairness, the exact concerns raised by automated screening.",lo:3,hi:10,lvl:"Foundational",cred:true}
+    ]
+  }
+};
+
+const STEP_NAMES=["Role","What's changing","Capability","Learning","Pathway"];
+const STEP_OF={0:-1,1:0,2:0,3:1,4:2,5:3,6:4,7:5};
+let state={};
+
+// stepper
+const stepsEl=document.getElementById('steps');
+STEP_NAMES.forEach(n=>{const li=document.createElement('li');li.innerHTML='<div class="track"><i></i></div><span>'+n+'</span>';stepsEl.appendChild(li);});
+
+function go(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById('s'+n); el.classList.add('on');
+  const cur=STEP_OF[n];
+  document.getElementById('stepper').classList.toggle('show',cur>=0);
+  [...stepsEl.children].forEach((li,i)=>{li.classList.toggle('past',i<cur);li.classList.toggle('on',i===cur);});
+  if(n===3)renderChange(); if(n===4)renderCap(); if(n===5)renderCourses(); if(n===6)renderSummary(); if(n===7)renderDone();
+  paint(el);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// roles
+const rl=document.getElementById('rolelist');
+Object.entries(ROLES).forEach(([k,r])=>{
+  const b=document.createElement('button');b.className='role';
+  b.innerHTML='<div class="ico '+r.tone+'">'+svg(r.icon)+'</div><span class="arrow">'+svg('arrow')+'</span><b>'+r.label+'</b><span class="sub">'+r.sub+'</span><div class="tags">'+r.tags.map(t=>'<span class="chip">'+t+'</span>').join('')+'</div>';
+  b.onclick=()=>{state.role=k;go(2);};
+  rl.appendChild(b);
+});
+
+// confidence scale
+const labels=["Not at all","Slightly","Somewhat","Fairly","Very"];
+const ps=document.getElementById('prescale');
+labels.forEach((l,i)=>{
+  const b=document.createElement('button');b.setAttribute('aria-pressed','false');
+  b.innerHTML='<b>'+(i+1)+'</b><span>'+l+'</span>';
+  b.onclick=()=>{[...ps.children].forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');state.pre=i+1;document.getElementById('prenext').disabled=false;};
+  ps.appendChild(b);
+});
+
+const R=()=>ROLES[state.role];
+const li=(icon,t)=>'<li>'+svg(icon)+'<span>'+t+'</span></li>';
+
+function renderChange(){
+  const r=R();
+  const ico=document.getElementById('changeIco');ico.className='ico '+r.tone;ico.innerHTML=svg(r.icon);
+  document.getElementById('changeTitle').textContent=r.changeTitle;
+  document.getElementById('changeBody').textContent=r.change;
+  document.getElementById('thenList').innerHTML=r.then.map(t=>li('dot',t)).join('');
+  document.getElementById('nowList').innerHTML=r.now.map(t=>li('check',t)).join('');
+  document.getElementById('changeSrc').textContent=r.src;
+}
+function renderCap(){
+  const r=R();
+  document.getElementById('capTitle').textContent=r.capTitle;
+  document.getElementById('capBody').textContent=r.capBody;
+  document.getElementById('notNeed').innerHTML=r.notNeed.map(t=>'<span class="chip x">'+t+'</span>').join('');
+  document.getElementById('need').innerHTML=r.need.map(t=>'<span class="chip t">'+t+'</span>').join('');
+  document.getElementById('valueList').innerHTML=r.values.map(v=>'<li><span class="ck">'+svg('check',2.5)+'</span><span>'+v+'</span></li>').join('');
+}
+function hrs(c){return c.lo+'–'+c.hi+' hrs';}
+function renderCourses(){
+  const r=R();
+  document.getElementById('courseIntro').textContent=r.intro;
+  document.getElementById('courseList').innerHTML=r.courses.map((c,i)=>
+    '<div class="course'+(i===0?' first':'')+'">'+(i===0?'<span class="ribbon">START HERE</span>':'')+
+    '<div class="num">'+(i+1)+'</div><div><h3>'+c.t+'</h3><p>'+c.d+'</p><div class="chips">'+
+    '<span class="chip b">'+svg('clock')+hrs(c)+'</span>'+
+    '<span class="chip a">'+c.lvl+'</span>'+
+    '<span class="chip">Free</span>'+
+    (c.cred?'<span class="chip t">'+svg('badge')+'Digital credential</span>':'')+
+    '</div></div></div>').join('');
+}
+function renderSummary(){
+  const r=R();
+  const rows=[
+    ['user','Your role',r.label],
+    ['spark',"What's changing",r.changeTitle],
+    ['target','Capability to build',r.capTitle],
+    ['chart','What it lets you do',r.values[0]],
+    ['flag','Your first step',r.courses[0].t]
+  ];
+  document.getElementById('path').innerHTML=rows.map(x=>'<div class="pstep"><div class="dot">'+svg(x[0])+'</div><div><small>'+x[1]+'</small><b>'+x[2]+'</b></div></div>').join('');
+  const lo=r.courses.reduce((a,c)=>a+c.lo,0), hi=r.courses.reduce((a,c)=>a+c.hi,0);
+  document.getElementById('firstHrs').textContent=hrs(r.courses[0]);
+  document.getElementById('totalHrs').textContent=lo+'–'+hi+' hrs';
+  document.getElementById('totalLbl').textContent='for the full '+r.courses.length+'-course pathway, at your own pace';
+}
+function renderDone(){
+  document.getElementById('preRecall').textContent=state.pre||'–';
+  const btn=document.getElementById('formBtn'), miss=document.getElementById('formMissing');
+  if(!FORM_URL){btn.style.display='none';miss.style.display='block';return;}
+  const role=R()?R().label:'';
+  const src=state.src==='shared'?'Shared link':'Opened directly';
+  btn.href=FORM_URL
+    .replace(/\{ROLE\}|%7BROLE%7D/gi,encodeURIComponent(role))
+    .replace(/\{PRE\}|%7BPRE%7D/gi,encodeURIComponent(state.pre||''))
+    .replace(/\{SRC\}|%7BSRC%7D/gi,encodeURIComponent(src));
+  btn.style.display='';miss.style.display='none';
+}
+function restart(){
+  state={src:state.src};
+  [...ps.children].forEach(x=>x.setAttribute('aria-pressed','false'));
+  document.getElementById('prenext').disabled=true;
+  document.getElementById('sharedNote').style.display='none';
+  go(1);
+}
+
+/* ---- share a pathway ---- */
+function shareUrl(){ return location.origin+location.pathname+'?role='+state.role; }
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400);}
+async function share(){
+  const r=R(), url=shareUrl();
+  const text='This shows what’s changing in '+r.label+' roles and the free course worth starting with.';
+  if(navigator.share){ try{ await navigator.share({title:'IBM SkillsBuild Compass: '+r.label,text,url}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
+  try{ await navigator.clipboard.writeText(url); toast('Link copied. Paste it anywhere.'); }
+  catch(e){ window.prompt('Copy this link:',url); }
+}
+
+/* ---- entry: shared link or direct ---- */
+paint(document);
+const qRole=new URLSearchParams(location.search).get('role');
+if(qRole && ROLES[qRole]){
+  state={role:qRole,src:'shared'};
+  document.getElementById('sharedTxt').textContent='Someone shared the '+ROLES[qRole].label+' pathway with you';
+  document.getElementById('sharedNote').style.display='inline-flex';
+  go(2);
+}else{
+  state={src:'direct'};
+  go(0);
+}
+</script>
+</body>
+</html>
