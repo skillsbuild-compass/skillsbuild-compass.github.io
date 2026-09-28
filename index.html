@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IBM SkillsBuild Compass | Student Concept Prototype</title>
 <meta name="description" content="Student concept prototype: start with your job, see what's changing and what it's worth, then see the course.">
+<meta property="og:title" content="IBM SkillsBuild Compass (student concept)">
+<meta property="og:description" content="Start with your job, not a course list. See what's changing in your role and the free course worth starting with. 3 minutes.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://skillsbuild-compass.github.io/">
 <style>
 :root{
   color-scheme:light;
@@ -197,6 +201,11 @@ p{margin:0 0 14px}
 .course p{font-size:14px;color:var(--muted);margin:0 0 12px}
 .course .chips{gap:6px}
 .chip svg{width:12px;height:12px;display:inline-block;vertical-align:-1px;margin-right:4px}
+.why{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:var(--blue-s);border-left:3px solid var(--blue);font-size:13.5px;color:var(--ink-2)}
+.why b{color:var(--blue-d)}
+.clink{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:13.5px;font-weight:600;color:var(--blue);text-decoration:none}
+.clink:hover{text-decoration:underline}
+.clink svg{width:14px;height:14px}
 .ribbon{position:absolute;top:-11px;right:18px;background:var(--blue);color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:99px}
 .verified{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:12.5px;color:var(--teal);background:var(--teal-s);padding:12px 14px;border-radius:12px}
 .verified svg{flex:0 0 16px;width:16px;height:16px;margin-top:1px}
@@ -377,7 +386,7 @@ footer .fin{border-top:1px solid var(--line);padding-top:16px}
       <h2>The shortest route to that capability</h2>
       <p class="lead muted" id="courseIntro" style="margin:0"></p>
       <div class="courses stagger" id="courseList"></div>
-      <div class="verified"><span data-i="shield"></span><span>These are real, free IBM SkillsBuild courses. Titles, durations, levels and credentials checked against the public catalogue at skillsbuild.org/learning-catalog on 25 September 2026.</span></div>
+      <div class="verified"><span data-i="shield"></span><span>These are real, free IBM SkillsBuild courses. Titles, durations, levels, credentials and links checked against the public catalogue at skillsbuild.org/learning-catalog in September 2026. Starting a course needs a free SkillsBuild sign-in.</span></div>
       <div class="actions"><button class="btn" onclick="go(6)">See my full pathway <span data-i="arrow"></span></button></div>
     </div>
   </section>
@@ -397,7 +406,8 @@ footer .fin{border-top:1px solid var(--line);padding-top:16px}
         <div class="card" style="padding:22px">
           <h3>Not all-or-nothing</h3>
           <p class="small" style="margin:0 0 16px">You can stop after the first course and still have the capability that matters most in your role.</p>
-          <a class="btn ghost" href="https://skillsbuild.org/learning-catalog" target="_blank" rel="noopener">Open the SkillsBuild catalogue <span data-i="ext"></span></a>
+          <a class="btn" id="startFirst" target="_blank" rel="noopener">Start your first course <span data-i="ext"></span></a>
+          <p class="small" style="margin:12px 0 0">Or browse the full <a href="https://skillsbuild.org/learning-catalog" target="_blank" rel="noopener" style="color:var(--blue)">SkillsBuild catalogue</a>.</p>
         </div>
       </div>
     </div>
@@ -469,7 +479,7 @@ const paint = root=>root.querySelectorAll('[data-i]').forEach(el=>{el.innerHTML=
 const ROLES = {
   ops:{
     icon:'truck', tone:'b',
-    label:"Operations / Logistics", sub:"Planning, scheduling, team and process management",
+    label:"Operations / Logistics", short:"operations managers", sub:"Planning, scheduling, team and process management",
     tags:["Operations manager","Supervisor","Planner"],
     changeTitle:"Reporting is being automated. The judgement isn't.",
     change:"Systems now produce the numbers for you. The work that's moving up is reading them, spotting what's wrong, and getting a team to act.",
@@ -483,14 +493,14 @@ const ROLES = {
     values:["Take a raw system export and get it to where you'd defend the numbers in a meeting","Find the pattern behind a recurring delay instead of reacting to it each time","Put one chart in front of management that makes the case for you"],
     intro:"Start with the first. The others only matter once you can trust your own data.",
     courses:[
-      {t:"Data Manipulation and Preparation",d:"Fix missing values and duplicates, profile a data set, and clean and transform data in Microsoft Excel.",lo:3,hi:10,lvl:"Advanced",cred:false},
-      {t:"Data Visualization and Communication",d:"Build visualisations that communicate an insight rather than just display numbers.",lo:3,hi:10,lvl:"Advanced",cred:false},
-      {t:"Exploring the Basics of Project Management",d:"Stakeholder analysis and delivery frameworks: the language used when operational decisions get escalated.",lo:1,hi:3,lvl:"Intermediate",cred:false}
+      {t:"Data Manipulation and Preparation",d:"Fix missing values and duplicates, profile a data set, and clean and transform data in Microsoft Excel.",why:"This is the step that turns the export your system produces into numbers you would defend in a meeting.",url:"https://skills.yourlearning.ibm.com/activity/ALM-COURSE_3825432",lo:3,hi:10,lvl:"Advanced",cred:false},
+      {t:"Data Visualization and Communication",d:"Build visualisations that communicate an insight rather than just display numbers.",why:"Once the numbers are right, this is how you get management to act on them.",url:"https://skills.yourlearning.ibm.com/activity/ALM-COURSE_3947377",lo:3,hi:10,lvl:"Advanced",cred:false},
+      {t:"Exploring the Basics of Project Management",d:"Stakeholder analysis and delivery frameworks: the language used when operational decisions get escalated.",why:"Gives you the language for escalating an operational problem so it gets taken seriously.",url:"https://skills.yourlearning.ibm.com/activity/ALM-COURSE_3826383",lo:1,hi:3,lvl:"Intermediate",cred:false}
     ]
   },
   fin:{
     icon:'brief', tone:'v',
-    label:"Financial Advisory / Insurance", sub:"Client advisory, financial planning, commission-based roles",
+    label:"Financial Advisory / Insurance", short:"financial advisors", sub:"Client advisory, financial planning, commission-based roles",
     tags:["Financial advisor","Insurance agent","Wealth planner"],
     changeTitle:"Clients can now get basic financial analysis without you.",
     change:"Robo-advisors and AI chatbots handle the parts of advice that were easiest to standardise. That doesn't remove the advisor. It moves where the value sits.",
@@ -504,14 +514,14 @@ const ROLES = {
     values:["Answer \"why do I need you, the app does this\" with something specific, not defensive","Use AI to draft client messages and summarise documents, cutting unbilled admin time","Hold a clear position on where automated advice fails, because that is where your value now sits"],
     intro:"Start with the first. It's beginner level and earns you a digital credential.",
     courses:[
-      {t:"Getting Started with Generative AI",d:"Foundations of generative AI, its ethics, and how large language models are used in real settings like customer service.",lo:3,hi:10,lvl:"Foundational",cred:true},
-      {t:"Explore Emerging Tech",d:"An orientation across data, AI, cloud, cybersecurity and quantum. Useful if you're not sure which of these touches your work.",lo:3,hi:10,lvl:"Foundational",cred:true},
-      {t:"Cybersecurity and Data",d:"Data privacy, sensitive data, and what happens when client data is breached. Directly relevant to a regulated advisory role.",lo:1,hi:3,lvl:"Foundational",cred:false}
+      {t:"Getting Started with Generative AI",d:"Foundations of generative AI, its ethics, and how large language models are used in real settings like customer service.",why:"Covers exactly what your clients are comparing you against: what AI tools can do, and where they get it wrong.",url:"https://skills.yourlearning.ibm.com/activity/PLAN-BAEFCCAAD520",lo:3,hi:10,lvl:"Foundational",cred:true},
+      {t:"Explore Emerging Tech",d:"An orientation across data, AI, cloud, cybersecurity and quantum. Useful if you're not sure which of these touches your work.",why:"A broad map of the other technologies changing financial services, so you know what clients will ask about next.",url:"https://skills.yourlearning.ibm.com/activity/PLAN-B5FC126AEBFB",lo:3,hi:10,lvl:"Foundational",cred:true},
+      {t:"Cybersecurity and Data",d:"Data privacy, sensitive data, and what happens when client data is breached. Directly relevant to a regulated advisory role.",why:"Client data is your responsibility. This covers how breaches happen and what they cost.",url:"https://skills.yourlearning.ibm.com/activity/ALM-COURSE_4058876",lo:1,hi:3,lvl:"Foundational",cred:false}
     ]
   },
   hr:{
     icon:'people', tone:'t',
-    label:"HR / Recruitment", sub:"Talent acquisition, people operations, HR generalist",
+    label:"HR / Recruitment", short:"recruiters", sub:"Talent acquisition, people operations, HR generalist",
     tags:["Recruiter","HR executive","Talent partner"],
     changeTitle:"Software now screens the CV before you see the candidate.",
     change:"Automated shortlisting sits upstream of most recruiters, and HR is increasingly expected to bring evidence to hiring decisions rather than impressions.",
@@ -525,9 +535,9 @@ const ROLES = {
     values:["Turn a messy applicant-tracking export into a view of where candidates drop out","Take a hiring recommendation to a line manager with evidence behind it","Understand how AI screening scores a CV, for advising candidates and auditing your own process"],
     intro:"Start with data, then AI. The first course changes your day-to-day fastest.",
     courses:[
-      {t:"Data Manipulation and Preparation",d:"Clean and transform a data set in Microsoft Excel, handle missing values and duplicates, check data quality.",lo:3,hi:10,lvl:"Advanced",cred:false},
-      {t:"Data Visualization and Communication",d:"Communicate a finding from hiring data to the people who make decisions on it.",lo:3,hi:10,lvl:"Advanced",cred:false},
-      {t:"Getting Started with Generative AI",d:"Foundations of generative AI and its ethics: transparency, accountability and fairness, the exact concerns raised by automated screening.",lo:3,hi:10,lvl:"Foundational",cred:true}
+      {t:"Data Manipulation and Preparation",d:"Clean and transform a data set in Microsoft Excel, handle missing values and duplicates, check data quality.",why:"Your applicant-tracking export is a data set. This is where you learn to clean it and trust it.",url:"https://skills.yourlearning.ibm.com/activity/ALM-COURSE_3825432",lo:3,hi:10,lvl:"Advanced",cred:false},
+      {t:"Data Visualization and Communication",d:"Communicate a finding from hiring data to the people who make decisions on it.",why:"Turns a hiring funnel into one chart a line manager will actually read.",url:"https://skills.yourlearning.ibm.com/activity/ALM-COURSE_3947377",lo:3,hi:10,lvl:"Advanced",cred:false},
+      {t:"Getting Started with Generative AI",d:"Foundations of generative AI and its ethics: transparency, accountability and fairness, the exact concerns raised by automated screening.",why:"Fairness, transparency and accountability are the questions to ask of the software ranking your candidates.",url:"https://skills.yourlearning.ibm.com/activity/PLAN-BAEFCCAAD520",lo:3,hi:10,lvl:"Foundational",cred:true}
     ]
   }
 };
@@ -596,12 +606,13 @@ function renderCourses(){
   document.getElementById('courseIntro').textContent=r.intro;
   document.getElementById('courseList').innerHTML=r.courses.map((c,i)=>
     '<div class="course'+(i===0?' first':'')+'">'+(i===0?'<span class="ribbon">START HERE</span>':'')+
-    '<div class="num">'+(i+1)+'</div><div><h3>'+c.t+'</h3><p>'+c.d+'</p><div class="chips">'+
+    '<div class="num">'+(i+1)+'</div><div><h3>'+c.t+'</h3><p>'+c.d+'</p>'+
+    '<div class="why"><b>Why this one for '+r.short+':</b> '+c.why+'</div><div class="chips">'+
     '<span class="chip b">'+svg('clock')+hrs(c)+'</span>'+
     '<span class="chip a">'+c.lvl+'</span>'+
     '<span class="chip">Free</span>'+
     (c.cred?'<span class="chip t">'+svg('badge')+'Digital credential</span>':'')+
-    '</div></div></div>').join('');
+    '</div><a class="clink" href="'+c.url+'" target="_blank" rel="noopener">View this course on SkillsBuild '+svg('ext')+'</a></div></div>').join('');
 }
 function renderSummary(){
   const r=R();
@@ -615,6 +626,7 @@ function renderSummary(){
   document.getElementById('path').innerHTML=rows.map(x=>'<div class="pstep"><div class="dot">'+svg(x[0])+'</div><div><small>'+x[1]+'</small><b>'+x[2]+'</b></div></div>').join('');
   const lo=r.courses.reduce((a,c)=>a+c.lo,0), hi=r.courses.reduce((a,c)=>a+c.hi,0);
   document.getElementById('firstHrs').textContent=hrs(r.courses[0]);
+  document.getElementById('startFirst').href=r.courses[0].url;
   document.getElementById('totalHrs').textContent=lo+'–'+hi+' hrs';
   document.getElementById('totalLbl').textContent='for the full '+r.courses.length+'-course pathway, at your own pace';
 }
